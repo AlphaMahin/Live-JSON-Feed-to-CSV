@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Live JSON Feed to CSV file convert | Tanbir Mahin</title>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<style type="text/css">
+	@import url('https://fonts.googleapis.com/css?family=Raleway');
+
+		body{
+			text-align: center;
+			margin: 0px auto;
+			padding: 0;
+			background-color: #c65133;
+		}
+		#btn_down{
+			width: 180px;
+			height: 80px;
+			background-color: transparent;
+			color: white;
+			border: 5px solid white;
+			text-align: center;
+			font-family: 'Raleway', sans-serif;
+			font-size: 20px;
+			font-weight: 400;
+		}
+		#btn_down:focus{
+			outline: none;
+		}
+		#btn_down:hover{
+			color: #c65133;
+			background-color: white;
+			cursor: pointer;
+		}
+		h2{
+			font-family: 'Raleway', sans-serif;
+			font-size: 35px;
+			color: white;
+		}
+	</style>
+</head>
+<body>
+	<div>
+		<h2>JSON Feed to CSV</h2>
+	</div>
+			<br><br><br><br>
+	<div>
+		<button id="btn_down">Download</button>
+	</div>
+
+<script>
+	var row = "";
+	var CSV = '';  
+
+	$(document).ready(function(){
+    	$.ajax({
+    		method: 'GET',
+        	url: 'json.php', //path of the json.php        
+        	success: function (data) {
+            	var response = JSON.parse(data);
+
+            	// Heading of the CSV
+				row = "site,id,title,scrapeTimestamp,timestamp,date,city,scrapeDate,schedule,url,description,division";
+				
+		        //append Label row with line break
+		        CSV += row + '\r\n\n';
+
+		        //purpose: used for next job fetch
+		        var i = 1;
+		        
+		        //This loop is to extract each row
+		        while(response.jobs[i]){
+		        	row = "";
+			        
+			        //Below, Extract each column and convert it in string comma-seprated     
+			      	//For Site value
+					// Manually handling the JSON response
+			        	if(response.jobs[i].site)
+			        	{
+			        		row += '"' + response.jobs[i].site + '",';
+			        	}
+			        	//For id value
+			        	if(response.jobs[i].id)
+			        	{
+			        		row += '"' + response.jobs[i].id + '",';
+			        	}
+			        	//For title value
+			        	if(response.jobs[i].title)
+			        	{
+			        		row += '"' + response.jobs[i].title + '",';
+			        	}
+			        	//For scrapeTimestamp value
+			        	if(response.jobs[i].scrapeTimestamp)
+			        	{
+			        		row += '"' + response.jobs[i].scrapeTimestamp + '",';
+			        	}
+			        	//For timestamp value
+			        	if(response.jobs[i].timestamp)
+			        	{
+			        		row += '"' + response.jobs[i].timestamp + '",';
+			        	}
+			        	else
+			        	{
+			        		row += ',';
+			        	}
+
+			        	//For date value
+			        	if(response.jobs[i].date)
+			        	{
+			        		row += '"' + response.jobs[i].date + '",';
+			        	}
+			        	else
+			        	{
+			        		row += ',';
+			        	}
+			        	//For city value
+			        	if(response.jobs[i].city)
+			        	{
+			        		row += '"' + response.jobs[i].city + '",';
+			        	}
+			        	//For scrapeDate value
+			        	if(response.jobs[i].scrapeDate)
+			        	{
+			        		row += '"' + response.jobs[i].scrapeDate + '",';
+			        	}
+
+			        	//For schedule value
+			        	if(response.jobs[i].schedule)
+			        	{
+			        		row += '"' + response.jobs[i].schedule + '",';
+			        	}
+			        	else
+			        	{
+			        		row += ',';
+			        	}
+
+			        	//For url value
+			        	if(response.jobs[i].url)
+			        	{
+			        		row += '"' + response.jobs[i].url + '",';
+			        	}
+			        	//For description value
+			        	if(response.jobs[i].description)
+			        	{
+			        		var str = response.jobs[i].description;
+			        		var desc = str.replace(/[,|\n]/g,' ');
+			        		row += '"' + desc + '",';
+			        	}
+			        	//For division value
+			        	if(response.jobs[i].division)
+			        	{
+			        		row += '"' + response.jobs[i].division + '",';
+			        	}
+
+			        	
+			        
+			        //slicing the rightmost comma
+			        row.slice(0, row.length - 1);
+			        
+			        //add a line break after each row
+			        CSV += row + '\r\n';
+
+			        //increment for new jobs value
+			        i++;
+		        }
+
+		    },
+		    error: function(e){
+		        	alert("Fetch Failed");
+		        }
+    	});
+		
+		$("#btn_down").click(function(){
+				//Exporting Part
+        		var fileName = "New_Job_Report";
+			    //this will remove the blank-spaces from the title and replace it with an underscore
+			    //fileName += ReportTitle.replace(/ /g,"_");   
+			    
+			    //Initialize file format you want csv or xls
+			    var uri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV);
+			    
+			    // Now the little tricky part.
+			    // you can use either>> window.open(uri);
+			    // but this will not work in some browsers
+			    // or you will not get the correct file extension    
+			    
+			    //this trick will generate a temp <a /> tag
+			    var link = document.createElement("a");    
+			    link.href = uri;
+			    
+			    //set the visibility hidden so it will not effect on your web-layout
+			    link.style = "visibility:hidden";
+			    link.download = fileName + ".csv";
+			    
+			    //this part will append the anchor tag and remove it after automatic click
+			    document.body.appendChild(link);
+			    link.click();
+			    document.body.removeChild(link);
+    	});
+	});
+
+</script>
+</body>
+</html>
